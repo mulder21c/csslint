@@ -2738,6 +2738,170 @@ CSSLint.addRule({
 
 });
 
+
+CSSLint.addRule({
+	id: "no-under-score",
+	name: "Disallow classes with underscores",
+    description: "classnames should use dash instead of underscore",
+	browsers: "All",
+
+	init : function(parser, reporter){
+        "use strict";
+        var rule = this
+		
+		 parser.addListener("startrule", function(event) {
+            var selectors = event.selectors,
+                    selector,
+                    part,
+                    modifier,
+                    i, j, k;
+
+            for (i = 0; i < selectors.length; i++) {
+                selector = selectors[i];
+                for (j = 0; j < selector.parts.length; j++) {
+                    part = selector.parts[j];
+                    if (part.type == parser.SELECTOR_PART_TYPE) {
+                        for (k = 0; k < part.modifiers.length; k++) {
+                            modifier = part.modifiers[k];
+                            if (modifier.type == "class") {
+                                if (/[^\.a-z0-9-]/.test(modifier)) {
+                                    reporter.report("Use only alphanumeric character ([a-z]lowercase) and dashes in classnames. " + modifier, modifier.line, modifier.col, rule);
+                                }
+                            }
+
+                        }
+                    }
+                }
+            }
+        });
+	}
+});
+
+CSSLint.addRule({
+
+    //rule information
+    id: "disallow-font-shorthand",
+    name: "use long notation for font",
+    desc: "font should not be used since it causes confusion in shorthand notation",
+    browsers: "All",
+
+    //initialization
+    init: function(parser, reporter){
+        var rule = this;
+
+        parser.addListener("property", function(event){
+			var name = event.property.text;
+            var name = name.toLowerCase();
+            if (name==="font") {
+				reporter.report("Don't use shorthand notation for font: " + name, event.line, event.col, rule);
+            }
+        });
+    }
+
+});
+
+CSSLint.addRule({
+	id : "indent-with-2-spaces",
+	name : "Indent with 2 spaces",
+	browsers : "All",
+	
+	init : function(parser, reporter){
+		var startsWith = require("es5-ext/string/#/starts-with"),
+			rule = this,
+			ruleOpened = false,
+			columIdx;
+
+		reporter.lines.forEach(function (line, lineIndex){
+			if(line.indexOf("{") > -1 && line.indexOf("}") > -1){
+				columIdx = line.indexOf("{");
+				reporter.report("Do not write css contents in one line", lineIndex + 1, columIdx + 1, rule);
+				ruleOpened = false;
+				return;
+			}
+			if(ruleOpened === false && /^\s+|\t+/.test(line) ){
+				reporter.report("Unexpected space at beginning of line", lineIndex + 1, 1, rule);
+			}
+			if(line.indexOf("{") > -1){
+				ruleOpened = true;
+				return;
+			}
+			if(line.indexOf("}") > -1){
+				ruleOpened = false;
+				return;
+			}
+			if(ruleOpened === true && /^\s{2}\S/.test(line) === false ){
+				reporter.report("CSS indenting must be 2 space", lineIndex + 1, 1, rule);
+			}
+		});
+	}
+});
+
+CSSLint.addRule({
+	id : "indent-with-4-spaces",
+	name : "Indent with 4 spaces",
+	browsers : "All",
+	
+	init : function(parser, reporter){
+		var startsWith = require("es5-ext/string/#/starts-with"),
+			rule = this,
+			ruleOpened = false,
+			columIdx;
+
+		reporter.lines.forEach(function (line, lineIndex){
+			if(line.indexOf("{") > -1 && line.indexOf("}") > -1){
+				columIdx = line.indexOf("{");
+				reporter.report("Do not write css contents in one line", lineIndex + 1, columIdx + 1, rule);
+				ruleOpened = false;
+				return;
+			}
+			if(ruleOpened === false && /^\s+|\t+/.test(line) ){
+				reporter.report("Unexpected space at beginning of line", lineIndex + 1, 1, rule);
+			}
+			if(line.indexOf("{") > -1){
+				ruleOpened = true;
+				return;
+			}
+			if(line.indexOf("}") > -1){
+				ruleOpened = false;
+				return;
+			}
+			if(ruleOpened === true && /^\s{4}\S/.test(line) === false ){
+				reporter.report("CSS indenting must be 4 space", lineIndex + 1, 1, rule);
+			}
+		});
+	}
+});
+
+CSSLint.addRule({
+	id : "Disallow-Empty-Lines-in-block",
+	name : "Disallow empty lines in CSS Code blocks",
+	browsers : "All",
+	
+	init : function(parser, reporter){
+		var rule = this,
+			ruleOpened = false;
+
+		reporter.lines.forEach(function (line, lineIndex){
+			if(line.indexOf("{") > -1 && line.indexOf("}") > -1){
+				ruleOpened = false;
+				return;
+			}
+			if(line.indexOf("{") > -1){
+				ruleOpened = true;
+				return;
+			}
+			if(line.indexOf("}") > -1){
+				ruleOpened = false;
+				return;
+			}
+			if(ruleOpened === true && line.trim() === ""){
+				reporter.report("Do not use empty line", lineIndex + 1, 1, rule);
+				return;
+			}
+		});
+	}
+});
+
 (function() {
     "use strict";
 
